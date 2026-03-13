@@ -1,0 +1,94 @@
+{
+  "flow_name": "auto_insurance_quote",
+  "agent_persona": {
+    "name": "Lyra",
+    "tone": "warm, concise, human-like",
+    "style_guidelines": [
+      "Ask only for missing or unclear information.",
+      "Never invent or guess customer data.",
+      "Reuse any known data from prior messages or state.",
+      "Keep messages short and friendly, like a helpful human assistant.",
+      "Confirm critical details such as CPF and vehicle plate before proceeding."
+    ],
+    "example_intro": "Oi, eu sou a Lyra. Vou te ajudar a buscar um orçamento de seguro de carro. Vou perguntar só o que for necessário, tudo bem?"
+  },
+  "required_fields": [
+    "cpf",
+    "full_name",
+    "address",
+    "vehicle_plate"
+  ],
+  "field_prompts": {
+    "cpf": "Qual é o seu CPF? Pode enviar só os números.",
+    "full_name": "Qual é o seu nome completo, como aparece nos documentos?",
+    "address": "Me conta seu endereço completo (rua, número, bairro, cidade e CEP).",
+    "phone": "Se quiser, me passa um telefone para contato (com DDD).",
+    "vehicle_plate": "Qual é a placa do veículo que você quer segurar?"
+  },
+  "steps": [
+    {
+      "name": "greet",
+      "description": "Bem-vinda(o) e explicação rápida do que Lyra vai fazer.",
+      "on_enter": {
+        "message_template": "Oi, eu sou a Lyra. Vou te ajudar com um orçamento de seguro de carro. Vou perguntar só o que estiver faltando, tudo bem?"
+      },
+      "next": "collect_core_fields"
+    },
+    {
+      "name": "collect_core_fields",
+      "description": "Coleta cpf, full_name, address e vehicle_plate, perguntando só o que ainda falta.",
+      "missing_fields_logic": {
+        "source": "conversation_state.collected_fields",
+        "required_fields": [
+          "cpf",
+          "full_name",
+          "address",
+          "vehicle_plate"
+        ]
+      },
+      "on_missing_field": {
+        "strategy": "ask_one_by_one",
+        "prompt_source": "field_prompts"
+      },
+      "next_when_complete": "review_summary"
+    },
+    {
+      "name": "review_summary",
+      "description": "Reforça o que foi entendido e pede pequena confirmação.",
+      "on_enter": {
+        "message_template": "Perfeito, entendi assim:\\n- CPF: {cpf}\\n- Nome: {full_name}\\n- Endereço: {address}\\n- Placa: {vehicle_plate}\\nSe algo estiver diferente do correto, me avisa antes de eu seguir, combinado?"
+      },
+      "next": "ready_for_quote"
+    },
+    {
+      "name": "ready_for_quote",
+      "description": "Indica que já há dados suficientes para simular um orçamento.",
+      "on_enter": {
+        "message_template": "Com esses dados já consigo simular um orçamento inicial. Quando quiser seguir, é só dizer algo como 'pode simular' ou 'quero o orçamento'."
+      }
+    }
+  ],
+  "lookup_rules": {
+    "customer_lookup": {
+      "by_telegram_user_id": true,
+      "by_cpf": true,
+      "reuse_fields": [
+        "cpf",
+        "full_name",
+        "address",
+        "phone"
+      ]
+    },
+    "document_extraction": {
+      "enabled": true,
+      "supported_fields": [
+        "cpf",
+        "full_name",
+        "address",
+        "vehicle_plate"
+      ],
+      "strategy": "try_ocr_then_ask_if_ambiguous"
+    }
+  }
+}
+
