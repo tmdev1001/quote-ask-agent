@@ -22,7 +22,8 @@ class BaseRepository(Generic[ModelT]):
         return await self.session.get(self.model, id_)
 
     async def list(self, stmt: Optional[Select[Any]] = None) -> List[ModelT]:
-        query = stmt or select(self.model)
+        # Avoid truthiness checks on SQLAlchemy expressions.
+        query = stmt if stmt is not None else select(self.model)
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
