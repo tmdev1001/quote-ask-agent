@@ -21,6 +21,12 @@ class Settings(BaseSettings):
         description="SQLAlchemy database URL. SQLite for local by default.",
     )
 
+    # Base URL used for building external-facing links (e.g. checkout)
+    base_url: str = Field(
+        default="http://localhost:8000",
+        description="Public base URL for external links (PoC).",
+    )
+
     # Reserved for later integrations (Agents SDK, Telegram, etc.)
     openai_api_key: str = Field(default="", description="OpenAI API key")
     openai_model: str = Field(default="gpt-4.1-mini")
